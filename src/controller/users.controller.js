@@ -1,4 +1,4 @@
-import { getAllUsersData, getUserByIdData, createUserData, deleteUserData } 
+import { getAllUsersData, getUserByIdData, createUserData, deleteUserData, verifyCredentials, updatedUserData } 
 from '../services/users.service.js';
 
 export const getAllUsers = async (req, res) => {
@@ -47,5 +47,26 @@ export const deleteUser = async (req, res) => {
     }
 };
 
+export const updatedUser = async (req, res) => {
+    try {
+        const updated = await updatedUserData(req.params.id, req.body);
+        if (updated) {
+            res.status(200).json(updated);
+        } else {
+            res.status(404).json({ message: `Usuario no encontrado con ID ${req.params.id}` });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error al actualizar usuario', error: error.message });
+    }
+};
 
+export const loginUser  = async (req, res) => { 
+    try {
+        const { email, password } = req.body;
+        const user = await verifyCredentials(email, password);
+        res.status(200).json({ msj: "Usuario verificado correctamente", user});
+    } catch (error) {
+        res.status(401).json({ message: 'Credenciales inválidas', error: error.message });
+    }
+};
 

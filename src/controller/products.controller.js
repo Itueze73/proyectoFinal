@@ -1,4 +1,4 @@
-import { getAllProductsData, getProductByIdData, createProductData, deleteProductData } from '../services/products.service.js';
+import { getAllProductsData, getProductByIdData, createProductData, deleteProductData, updateProductData} from '../services/products.service.js';
 
 export const getAllProducts = async (req, res) => {         
     try {
@@ -25,53 +25,7 @@ export const getProductById = async (req, res) => {
 
 export const createProduct = async (req, res) => {
   try {
-    // Mapea alias: acepta nombre/name y precio/price
-    const rawBody = req.body || {};
-    const nombre = rawBody.nombre ?? rawBody.name;
-    const rawPrecio = rawBody.precio ?? rawBody.price;
-    const descripcion = rawBody.descripcion ?? rawBody.description;
-
-    // normalizar precio: puede venir como "3000"
-    const precio = typeof rawPrecio === 'string'
-      ? (rawPrecio.trim() === '' ? null : Number(rawPrecio))
-      : rawPrecio;
-
-    // Validación secuencial: devolver sólo el primer error
-    if (nombre == null || typeof nombre !== 'string' || nombre.trim() === '') {
-      return res.status(400).json({
-        field: 'nombre',
-        message: 'El nombre es obligatorio y debe ser un texto válido'
-      });
-    }
-
-    if (precio == null || Number.isNaN(precio)) {
-      return res.status(400).json({
-        field: 'precio',
-        message: 'El precio es obligatorio y debe ser un número'
-      });
-    }
-
-    if (typeof precio !== 'number' || precio <= 0) {
-      return res.status(400).json({
-        field: 'precio',
-        message: 'El precio debe ser un número mayor a 0'
-      });
-    }
-
-    if (descripcion !== undefined && descripcion !== null &&
-        (typeof descripcion !== 'string' || descripcion.trim() === '')) {
-      return res.status(400).json({
-        field: 'descripcion',
-        message: 'Si envías una descripción, debe ser texto válido'
-      });
-    }
-
-    // Crear producto con los campos normalizados
-    const newProduct = await createProductData({
-      nombre: nombre.trim(),
-      precio,
-      descripcion: descripcion == null ? undefined : String(descripcion).trim()
-    });
+    const newProduct = await createProductData(req.body || {});
 
     return res.status(201).json({
       status: 'success',
@@ -81,6 +35,15 @@ export const createProduct = async (req, res) => {
 
   } catch (error) {
     console.error(error);
+    
+    if (error.status === 400) {
+      return res.status(400).json({
+        status: 'error',
+        message: 'Validación fallida',
+        errors: error.errors || [error.message]
+      });
+    }
+
     return res.status(500).json({
       status: 'error',
       message: 'Error al crear el producto',
@@ -89,9 +52,21 @@ export const createProduct = async (req, res) => {
   }
 };
 
+export const updateProduct = async (req, res) => {
+    try {
+        const { id } = req.params;  
+        const updated = await updateProductData(id, req.body); 
+        if (updated) {
+            res.status(200).json(updated);
+        } else {
+            res.status(404).json({ message: `Producto no encontrado con ID ${id}` });
+        }
+    } catch (error) {
+        res.status(500).json({ message: 'Error al actualizar producto', error: error.message });
+    }
+};
 
 
- 
 export const deleteProduct = async (req, res) => {
     try {
         const { id } = req.params;  
