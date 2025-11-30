@@ -1,9 +1,14 @@
-import { getAllProductsData, getProductByIdData, createProductData, deleteProductData, updateProductData} from '../services/products.service.js';
+import e from 'express';
+import { getAllProductsData, getProductByIdData, createProductData, deleteProductData, updateProductData, patchProductData } 
+from '../services/products.service.js';
 
 export const getAllProducts = async (req, res) => {         
     try {
         const products = await getAllProductsData();
-        res.status(200).json(products);
+        res.status(200).json({
+            status: 'success',
+            data: products
+        });
     } catch (error) {
         res.status(500).json({ message: 'Error al obtener productos', error: error.message });
     }
@@ -14,7 +19,10 @@ export const getProductById = async (req, res) => {
         const { id } = req.params;  
         const product = await getProductByIdData(id); 
         if (product) {
-            res.status(200).json(product);          
+            res.status(200).json({
+                status: 'success',
+                data: product
+            });          
         } else {
             res.status(404).json({ message: `Producto no encontrado por ID ${id}` });
         }
@@ -57,15 +65,44 @@ export const updateProduct = async (req, res) => {
         const { id } = req.params;  
         const updated = await updateProductData(id, req.body); 
         if (updated) {
-            res.status(200).json(updated);
+            res.status(200).json({
+                status: 'success',
+                message: 'Producto actualizado exitosamente',
+                data: updated
+            });
+
         } else {
-            res.status(404).json({ message: `Producto no encontrado con ID ${id}` });
+            res.status(404).json({ message: `Producto no encontrado con ID ${id}`, error: error.message });
         }
     } catch (error) {
+        if (error.status === 400) {
+            return res.status(400).json({
+                status: 'error',
+                message: 'Validación fallida',
+                errors: error.errors || [error.message]
+            });
+        }
         res.status(500).json({ message: 'Error al actualizar producto', error: error.message });
     }
 };
 
+export const patchProduct = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updated = await patchProductData(id, req.body);
+        if (updated) return res.status(200).json({
+            status: 'success',
+            message: 'Producto actualizado parcialmente exitosamente',
+            data: updated
+        });
+        return res.status(404).json({ message: `Producto no encontrado con ID ${id}` });
+    } catch (error) {
+        if (error.status === 400) {
+            return res.status(400).json({ status: 'error', message: 'Validación fallida', errors: error.errors || [error.message] });
+        }
+        return res.status(500).json({ message: 'Error al actualizar parcialmente el producto', error: error.message });
+    }
+};
 
 export const deleteProduct = async (req, res) => {
     try {
@@ -74,7 +111,7 @@ export const deleteProduct = async (req, res) => {
         if (deleted) {
             res.status(200).json({ message: 'Producto eliminado correctamente' });
         } else {
-            res.status(404).json({ message: 'Producto no encontrado' });
+            res.status(404).json({ message: 'Producto no encontrado', error: `No existe producto con ID ${id}` });
         }
     }
     catch (error) {

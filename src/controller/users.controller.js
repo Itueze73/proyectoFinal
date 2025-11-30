@@ -1,3 +1,4 @@
+import e from 'express';
 import { getAllUsersData, getUserByIdData, createUserData, deleteUserData, verifyCredentials, updatedUserData } 
 from '../services/users.service.js';
 
@@ -30,7 +31,11 @@ export const createUser = async (req, res) => {
         const newUser = await createUserData(req.body);
         res.status(201).json(newUser);
     } catch (error) {
-        res.status(400).json({ message: 'Error al crear usuario', error: error.message });
+        const status = error.status || 400;
+        if (error.errors) {
+            return res.status(status).json({ message: 'Error al crear usuario', errors: error.errors });
+        }
+        return res.status(status).json({ message: 'Error al crear usuario', error: error.message });
     }
 };  
 
@@ -43,7 +48,8 @@ export const deleteUser = async (req, res) => {
             res.status(404).json({ message: `Usuario no encontrado con ID ${req.params.id}` });
         }
     } catch (error) {
-        res.status(500).json({ message: `Error al eliminar el usuario con ID ${req.params.id}`, error: error.message });
+        const status = error.status || 500;
+        return res.status(status).json({ message: `Error al eliminar el usuario con ID ${req.params.id}`, error: error.message });
     }
 };
 
@@ -56,7 +62,28 @@ export const updatedUser = async (req, res) => {
             res.status(404).json({ message: `Usuario no encontrado con ID ${req.params.id}` });
         }
     } catch (error) {
-        res.status(500).json({ message: 'Error al actualizar usuario', error: error.message });
+        const status = error.status || 500;
+        if (error.errors) {
+            return res.status(status).json({ message: 'Error al actualizar usuario', errors: error.errors });
+        }
+        return res.status(status).json({ message: 'Error al actualizar usuario', error: error.message });
+    }
+};
+
+export const pachtUser = async (req, res) => {
+    try {
+        const updated = await updatedUserData(req.params.id, req.body);
+        if (updated) {
+            res.status(200).json(updated);
+        } else {
+            res.status(404).json({ message: `Usuario no encontrado con ID ${req.params.id}` });
+        }
+    } catch (error) {
+        const status = error.status || 500;
+        if (error.errors) {
+            return res.status(status).json({ message: 'Error al actualizar usuario', errors: error.errors });
+        }
+        return res.status(status).json({ message: 'Error al actualizar usuario', error: error.message });
     }
 };
 

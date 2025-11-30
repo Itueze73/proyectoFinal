@@ -1,104 +1,116 @@
 import bcrypt from "bcryptjs";
-import { leerBD, guardarBD } from "../data/db.js";
+import { collection, getDocs, addDoc, query, where, doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+import { db } from "../firebase/config.js";
 
 const ruta = 'users';
 
 export const getAllUsersData = async () => {
-    const bd = leerBD();
-    const users = bd[ruta] || [];
-    return users.map(({ password, ...user }) => user);
+    const snapshot = await getDocs(collection(db, ruta));
+    return snapshot.docs.map(d => {
+        const { password, ...rest } = d.data();
+        return { id: d.id, ...rest };
+    });
 };
 
 export const getUserByIdData = async (id) => {
-    const bd = leerBD();
-    const users = bd[ruta] || [];
-    const user = users.find(user => user.id === parseInt(id));
-    if (user) {
-        return { ...user, password: undefined };
-    }
-    return null;
+    const docRef = doc(db, ruta, String(id));
+    const snapshot = await getDoc(docRef);
+    if (!snapshot.exists()) return null;
+    const { password, ...rest } = snapshot.data();
+    return { id: snapshot.id, ...rest };
 };  
 
 export const createUserData = async (userData) => {
     const { nombre, email, password, rol, ubicacion, experiencia } = userData;
-    const bd = leerBD();
-    const users = bd[ruta] || [];
+    
     if (!nombre || !email || !password) {
-        throw new Error('Nombre, email y password son obligatorios');
-    } 
-    const existingUser = users.find(user => user.email === email);
-    if (existingUser) {
-        throw new Error('El email ya está registrado');
+        const err = new Error('Nombre, email y password son obligatorios');
+        err.status = 400;
+        throw err;
+    }
+    
+    const q = query(collection(db, ruta), where('email', '==', String(email).toLowerCase()));
+    const snapshot = await getDocs(q);
+    if (!snapshot.empty) {
+        const err = new Error('El email ya está registrado');
+        err.status = 409;
+        throw err;
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-    const newUser = { 
-        id: users.length > 0 ? users[users.length - 1].id + 1 : 1, 
-        nombre, 
-        email, 
-        password: hashedPassword, 
-        rol: rol || 'Sin asignar', 
-        ubicacion : ubicacion || 'Desconocida', 
+
+    const payload = {
+        nombre: String(nombre).trim(),
+        email: String(email).trim().toLowerCase(),
+        password: hashedPassword,
+        rol: rol || 'Sin asignar',
+        ubicacion: ubicacion || 'Desconocida',
         experiencia: experiencia || 'No especificada'
     };
 
-    users.push(newUser);
-    bd[ruta] = users;
-    guardarBD(bd);
-
-    return { ...newUser, password: undefined };
+    const docRef = await addDoc(collection(db, ruta), payload);
+    return { id: docRef.id, ...payload, password: undefined };
 };  
 
 export const  updatedUserData = async (id, userData) => {
-    const bd = leerBD();
-    const users = bd[ruta] || [];
-    const index = users.findIndex(user => user.id === Number(id));
-    if (index === -1) return null;
+    const docRef = doc(db, ruta, String(id));
+    const snapshot = await getDoc(docRef);
+    if (!snapshot.exists()) return null;
 
-    let newPassword = users[index].password;
-    if (userData.password) {
-        newPassword = await bcrypt.hash(userData.password, 10);
+    if (userData.email) {
+        const q = query(collection(db, ruta), where('email', '==', String(userData.email).toLowerCase()));
+        const found = await getDocs(q);
+        if (!found.empty) {
+            const other = found.docs.find(d => d.id !== String(id));
+            if (other) {
+                const err = new Error('El email ya está registrado por otro usuario');
+                err.status = 409;
+                throw err;
+            }
+        }
     }
-    const updated = {
-        id: users[index].id,
-        nombre: userData.nombre || users[index].nombre,
-        email: userData.email || users[index].email,
-        password: newPassword,
-        rol: userData.rol || users[index].rol,
-        ubicacion: userData.ubicacion || users[index].ubicacion,
-        experiencia: userData.experiencia || users[index].experiencia
-    };
 
-    users[index] = updated;
-    bd[ruta] = users;
-    guardarBD(bd);
+    const updates = {};
+    if (userData.nombre !== undefined) updates.nombre = String(userData.nombre).trim();
+    if (userData.email !== undefined) updates.email = String(userData.email).trim().toLowerCase();
+    if (userData.password !== undefined) updates.password = await bcrypt.hash(userData.password, 10);
+    if (userData.rol !== undefined) updates.rol = userData.rol;
+    if (userData.ubicacion !== undefined) updates.ubicacion = userData.ubicacion;
+    if (userData.experiencia !== undefined) updates.experiencia = userData.experiencia;
 
-    return { ...updated, password: undefined };
+    await updateDoc(docRef, updates);
+    const updatedSnap = await getDoc(docRef);
+    const { password, ...rest } = updatedSnap.data();
+    return { id: updatedSnap.id, ...rest };
 };  
 
+export const pachtUserData = async (id, partialData) => {
+    return updatedUserData(id, partialData);
+
+};
+
 export const deleteUserData = async (id) => {
-    const bd = leerBD();
-    const users = bd[ruta] || [];
-    const index = users.findIndex(user => user.id === id);
-    if (index !== -1) {
-        users.splice(index, 1);
-        bd[ruta] = users;
-        guardarBD(bd);
-        return true;
-    }
-    return false;
+    const docRef = doc(db, ruta, String(id));
+    const snapshot = await getDoc(docRef);
+    if (!snapshot.exists()) return false;
+    await deleteDoc(docRef);
+    return true;
 };      
 
 export const verifyCredentials = async (email, password) => {
-    const bd = leerBD();
-    const users = bd[ruta] || [];
-    const user = users.find(user => user.email === email);  
-    if (!user) {
+    const q = query(collection(db, ruta), where('email', '==', String(email).toLowerCase()));
+    const snapshot = await getDocs(q);
+    if (snapshot.empty) {
         throw new Error('Usuario no encontrado');
     }
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+
+    const docSnap = snapshot.docs[0];
+    const userData = docSnap.data();
+    const isPasswordValid = await bcrypt.compare(password, userData.password);
     if (!isPasswordValid) {
         throw new Error('Contraseña incorrecta');
     }
-    return { ...user, password: undefined };
+
+    const { password: pwd, ...rest } = userData;
+    return { id: docSnap.id, ...rest };
 };
