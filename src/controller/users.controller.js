@@ -1,6 +1,6 @@
-import e from 'express';
 import { getAllUsersData, getUserByIdData, createUserData, deleteUserData, verifyCredentials, updatedUserData } 
 from '../services/users.service.js';
+import jwt from 'jsonwebtoken';
 
 export const getAllUsers = async (req, res) => {
     try {
@@ -91,7 +91,9 @@ export const loginUser  = async (req, res) => {
     try {
         const { email, password } = req.body;
         const user = await verifyCredentials(email, password);
-        res.status(200).json({ msj: "Usuario verificado correctamente", user});
+        const tokenPayload = { id: user.id, email: user.email, rol: user.rol };
+        const token = jwt.sign(tokenPayload, process.env.JWT_SECRET, { expiresIn: '1h' });
+        res.status(200).json({ msj: "Usuario verificado correctamente", user, token });
     } catch (error) {
         res.status(401).json({ message: 'Credenciales inválidas', error: error.message });
     }
