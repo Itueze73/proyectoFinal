@@ -125,7 +125,7 @@ El servidor estará disponible en `http://localhost:3000`
 ### 📦 Productos
 
 | Método | Ruta | Descripción |
-|--------|------|-------------|---|
+|--------|------|-------------|
 | `GET` | `/api/products` | Obtener todos los productos 
 | `GET` | `/api/products/:id` | Obtener producto por ID 
 | `POST` | `/api/products` | Crear nuevo producto 
