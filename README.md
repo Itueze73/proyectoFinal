@@ -365,7 +365,7 @@ Content-Type: application/json
 
 ---
 
-### 7. Obtener Usuarios (Protegido - Requiere JWT y Rol Admin)
+### 7. Obtener Usuarios (Protegido - Requiere JWT)
 
 **Petición:**
 ```
@@ -393,7 +393,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ---
 
-### 8. Eliminar Producto
+### 8. Eliminar Producto (Protegido - Requiere JWT y Rol Admin)
 
 **Petición:**
 ```
@@ -558,12 +558,6 @@ Todas las respuestas de error incluyen:
 - `status`: Código HTTP
 - `message`: Mensaje descriptivo
 - `errors`: Array con detalles de validación (si aplica)
-
----
-
-## 🤝 Contribuciones
-
-Este es un proyecto educativo. Si encuentras bugs o tienes sugerencias:
 
 ---
 
