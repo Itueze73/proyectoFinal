@@ -116,7 +116,7 @@ npm run dev
 npm start
 ```
 
-El servidor estará disponible en `http://localhost:3001`
+El servidor estará disponible en `http://localhost:3000`
 
 ---
 
@@ -195,7 +195,7 @@ El servidor estará disponible en `http://localhost:3001`
 
 **Petición:**
 ```
-POST http://localhost:3001/api/products
+POST http://localhost:3000/api/products
 Content-Type: application/json
 
 {
@@ -225,7 +225,7 @@ Content-Type: application/json
 
 **Petición:**
 ```
-GET http://localhost:3001/api/products
+GET http://localhost:3000/api/products
 ```
 
 **Respuesta (200 OK):**
@@ -256,7 +256,7 @@ GET http://localhost:3001/api/products
 
 **Petición:**
 ```
-PUT http://localhost:3001/api/products/Kj8vL2pQ9mN
+PUT http://localhost:3000/api/products/Kj8vL2pQ9mN
 Content-Type: application/json
 
 {
@@ -286,7 +286,7 @@ Content-Type: application/json
 
 **Petición:**
 ```
-PATCH http://localhost:3001/api/products/Kj8vL2pQ9mN
+PATCH http://localhost:3000/api/products/Kj8vL2pQ9mN
 Content-Type: application/json
 
 {
@@ -313,7 +313,7 @@ Content-Type: application/json
 
 **Petición:**
 ```
-POST http://localhost:3001/api/users
+POST http://localhost:3000/api/users
 Content-Type: application/json
 
 {
@@ -340,7 +340,7 @@ Content-Type: application/json
 
 **Petición:**
 ```
-POST http://localhost:3001/api/users/login
+POST http://localhost:3000/api/users/login
 Content-Type: application/json
 
 {
@@ -369,7 +369,7 @@ Content-Type: application/json
 
 **Petición:**
 ```
-GET http://localhost:3001/api/users
+GET http://localhost:3000/api/users
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
@@ -397,7 +397,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 **Petición:**
 ```
-DELETE http://localhost:3001/api/products/Kj8vL2pQ9mN
+DELETE http://localhost:3000/api/products/Kj8vL2pQ9mN
 ```
 
 **Respuesta (200 OK):**
@@ -478,7 +478,7 @@ proyectoFinal/
 
 **Ejemplo con curl:**
 ```bash
-curl -X GET http://localhost:3001/api/users \
+curl -X GET http://localhost:3000/api/users \
   -H "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
 ```
 
