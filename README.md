@@ -124,25 +124,25 @@ El servidor estará disponible en `http://localhost:3000`
 
 ### 📦 Productos
 
-| Método | Ruta | Descripción | Autenticación |
+| Método | Ruta | Descripción |
 |--------|------|-------------|---|
-| `GET` | `/api/products` | Obtener todos los productos | ❌ No |
-| `GET` | `/api/products/:id` | Obtener producto por ID | ❌ No |
-| `POST` | `/api/products` | Crear nuevo producto | ❌ No |
-| `PUT` | `/api/products/:id` | Actualizar producto (completo) | ❌ No |
-| `PATCH` | `/api/products/:id` | Actualizar producto (parcial) | ❌ No |
-| `DELETE` | `/api/products/:id` | Eliminar producto | ❌ No |
+| `GET` | `/api/products` | Obtener todos los productos 
+| `GET` | `/api/products/:id` | Obtener producto por ID 
+| `POST` | `/api/products` | Crear nuevo producto 
+| `PUT` | `/api/products/:id` | Actualizar producto (completo) 
+| `PATCH` | `/api/products/:id` | Actualizar producto (parcial) 
+| `DELETE` | `/api/products/:id` | Eliminar producto 
 
 ### 👥 Usuarios
 
 | Método | Ruta | Descripción | Autenticación |
 |--------|------|-------------|---|
-| `GET` | `/api/users` | Obtener todos los usuarios | ✅ JWT + Admin |
-| `GET` | `/api/users/:id` | Obtener usuario por ID | ✅ JWT + Admin |
+| `GET` | `/api/users` | Obtener todos los usuarios | ✅ JWT |
+| `GET` | `/api/users/:id` | Obtener usuario por ID | ✅ JWT |
 | `POST` | `/api/users` | Registrar nuevo usuario | ❌ No |
 | `POST` | `/api/users/login` | Login y obtener JWT | ❌ No |
-| `PUT` | `/api/users/:id` | Actualizar usuario | ✅ JWT + Admin |
-| `PATCH` | `/api/users/:id` | Actualizar usuario (parcial) | ✅ JWT + Admin |
+| `PUT` | `/api/users/:id` | Actualizar usuario | ✅ JWT |
+| `PATCH` | `/api/users/:id` | Actualizar usuario (parcial) | ✅ JWT |
 | `DELETE` | `/api/users/:id` | Eliminar usuario | ✅ JWT + Admin |
 
 ---
