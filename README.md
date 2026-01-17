@@ -579,8 +579,10 @@ Este proyecto está bajo licencia **ISC**. Ver `LICENSE` para más detalles.
 ## 📧 Contacto
 
 - **Autor**: Ezequiel Iturriaga
-- **Email**: [iturriagaezequiel@gmail.com]
+- **Email**: [itu_elrengo@hotmail.com]
 - **GitHub**: [Itueze73](https://github.com/Itueze73)
+- **Cafesito**: [itueze73](https://cafecito.app/itueze73)
+- **X**: [@itueze73]
 
 
 ---
