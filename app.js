@@ -10,6 +10,8 @@ app.use((req, res) => {
     res.status(404).json({ message: 'Ruta no encontrada' });
 });
 
-const PORT = process.env.PORT || 3001;
+// const PORT = process.env.PORT || 3001;
 
-app.listen(PORT, () => {console.log(`Server en el puerto http://localhost:${PORT}`);});
+// app.listen(PORT, () => {console.log(`Server en el puerto http://localhost:${PORT}`);});
+
+export default app;

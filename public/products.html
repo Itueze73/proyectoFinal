@@ -1,0 +1,342 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Productos - Cliente API</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
+  <script>
+    // Restaurar preferencia de tema al cargar
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+</head>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100">
+  <div class="max-w-4xl mx-auto p-6">
+    <header class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold">Productos - Cliente</h1>
+      <div class="flex items-center gap-2">
+        <a href="/users.html" class="mr-4 bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600 dark:hover:bg-purple-700">Usuarios</a>
+        <button id="btn-dark-mode" class="bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded hover:bg-gray-400 dark:hover:bg-gray-600">🌙 Oscuro</button>
+      </div>
+    </header>
+
+    <main class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section class="bg-white dark:bg-gray-800 p-4 rounded shadow dark:shadow-gray-800">
+        <h2 class="font-semibold mb-2 dark:text-gray-100">Crear producto</h2>
+        <form id="form-create">
+          <input class="w-full mb-2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" name="nombre" placeholder="Nombre" required />
+          <input class="w-full mb-2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" name="descripcion" placeholder="Descripción (opcional)" />
+          <input class="w-full mb-2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" name="precio" placeholder="Precio" required />
+          <input class="w-full mb-2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" name="categoria" placeholder="Categoría (opcional)" />
+          <input class="w-full mb-2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" name="stock" placeholder="Stock" required />
+          <button class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 dark:hover:bg-green-700">Crear producto</button>
+        </form>
+      </section>
+
+      <section class="bg-white dark:bg-gray-800 p-4 rounded shadow dark:shadow-gray-800">
+        <h2 class="font-semibold mb-2 dark:text-gray-100">Buscar / Listar</h2>
+        <div class="flex gap-2 mb-2">
+          <button id="btn-get-all" class="bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600 dark:hover:bg-indigo-700">Listar todos</button>
+          <input id="input-get-id" class="w-1/2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="ID producto" />
+          <button id="btn-get-id" class="bg-indigo-400 text-white px-3 py-1 rounded hover:bg-indigo-500 dark:hover:bg-indigo-600">Obtener por ID</button>
+        </div>
+        <div class="mb-2">
+          <input id="input-delete-id" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="ID para eliminar" />
+          <button id="btn-delete" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 dark:hover:bg-red-700">Eliminar</button>
+        </div>
+        <details class="mb-2 dark:text-gray-100">
+          <summary class="cursor-pointer font-medium dark:hover:text-gray-200">Actualizar (PUT)</summary>
+          <div class="mt-2">
+            <input id="put-id" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="ID a actualizar" />
+            <input id="put-nombre" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="Nombre" />
+            <input id="put-descripcion" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="Descripción" />
+            <input id="put-precio" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="Precio" />
+            <input id="put-categoria" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="Categoría" />
+            <input id="put-stock" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="Stock" />
+            <button id="btn-put" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 dark:hover:bg-yellow-700">PUT</button>
+          </div>
+        </details>
+        <details class="dark:text-gray-100">
+          <summary class="cursor-pointer font-medium dark:hover:text-gray-200">Actualizar (PATCH)</summary>
+          <div class="mt-2">
+            <input id="patch-id" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="ID a patch" />
+            <input id="patch-field" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="Campo (nombre / descripcion / precio / categoria / stock)" />
+            <input id="patch-value" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="Valor" />
+            <button id="btn-patch" class="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 dark:hover:bg-yellow-600">PATCH</button>
+          </div>
+        </details>
+      </section>
+
+      <section class="bg-white dark:bg-gray-800 p-4 rounded shadow dark:shadow-gray-800 md:col-span-2">
+        <h2 class="font-semibold mb-2 dark:text-gray-100">Resultado</h2>
+
+        <div id="msg" class="mb-3"></div>
+        <div id="result-list" class="space-y-3"></div>
+        <pre id="result-json" class="whitespace-pre-wrap bg-gray-50 dark:bg-gray-700 dark:text-gray-100 p-4 rounded h-40 overflow-auto text-sm mt-3 hidden"></pre>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import { api, pretty } from './api-client.js';
+
+    // Dark mode toggle
+    const darkModeBtn = document.getElementById('btn-dark-mode');
+    darkModeBtn.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      if (document.documentElement.classList.contains('dark')) {
+        localStorage.theme = 'dark';
+        darkModeBtn.textContent = '☀️ Claro';
+      } else {
+        localStorage.theme = 'light';
+        darkModeBtn.textContent = '🌙 Oscuro';
+      }
+    });
+    // Actualizar el texto del botón según el estado actual
+    if (document.documentElement.classList.contains('dark')) {
+      darkModeBtn.textContent = '☀️ Claro';
+    }
+
+    const msgEl = document.getElementById('msg');
+    const listEl = document.getElementById('result-list');
+    const jsonEl = document.getElementById('result-json');
+
+    // Snapshot para permitir volver a la vista anterior
+    let snapshot = null;
+    function saveSnapshot() {
+      snapshot = {
+        msg: msgEl.innerHTML,
+        list: listEl.innerHTML,
+        jsonText: jsonEl.textContent,
+        jsonHidden: jsonEl.hidden
+      };
+    }
+    function restoreSnapshot() {
+      if (!snapshot) {
+        clearResults();
+        showMessage('No hay vista previa para volver', 'info');
+        return;
+      }
+      msgEl.innerHTML = snapshot.msg;
+      listEl.innerHTML = snapshot.list;
+      jsonEl.textContent = snapshot.jsonText;
+      jsonEl.hidden = snapshot.jsonHidden;
+      snapshot = null;
+    }
+
+    function clearResults() {
+      msgEl.innerHTML = '';
+      listEl.innerHTML = '';
+      jsonEl.hidden = true;
+      jsonEl.textContent = '';
+    }
+
+    function showMessage(text, variant = 'info') {
+      const colors = {
+        info: 'bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+        success: 'bg-green-50 text-green-800 dark:bg-green-900 dark:text-green-200',
+        error: 'bg-red-50 text-red-800 dark:bg-red-900 dark:text-red-200'
+      };
+      msgEl.innerHTML = `<div class="p-2 rounded ${colors[variant]}">${text}</div>`;
+    }
+
+    function showError(err) {
+      const message = (err && (err.message || err.error)) || 'Error';
+      showMessage(message, 'error');
+      if (err && err.response) {
+        jsonEl.textContent = pretty(err.response);
+        jsonEl.hidden = false;
+      }
+    }
+
+    function renderProductCard(p) {
+      const id = p.id;
+      return `
+        <div id="card-${id}" class="p-4 border rounded flex justify-between items-center bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
+          <div>
+            <div class="font-semibold text-lg">${p.nombre || '—'}</div>
+            <div class="text-sm text-gray-600 dark:text-gray-400">${p.categoria ? p.categoria + ' • ' : ''}${p.precio !== undefined ? '$' + p.precio : '—'}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Stock: ${p.stock !== undefined ? p.stock : '—'}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">${p.descripcion || ''}</div>
+          </div>
+          <div class="flex gap-2">
+            <button data-id="${id}" class="btn-view bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 dark:hover:bg-blue-700">Ver</button>
+            <button data-id="${id}" class="btn-delete bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 dark:hover:bg-red-700">Eliminar</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderProductList(products) {
+      clearResults();
+      if (!Array.isArray(products) || products.length === 0) return showMessage('No se encontraron productos', 'info');
+      const wrapper = document.createElement('div');
+      wrapper.className = 'grid gap-3';
+      wrapper.innerHTML = products.map(p => renderProductCard(p)).join('');
+      listEl.appendChild(wrapper);
+    }
+
+    async function viewProduct(id) {
+      try {
+        const p = await api.getProductById(id);
+        // antes de mostrar detalle, guardar la vista actual
+        saveSnapshot();
+        clearResults();
+        const panel = document.createElement('div');
+        panel.className = 'bg-white dark:bg-gray-800 p-4 rounded shadow dark:shadow-gray-800';
+        panel.innerHTML = `
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold dark:text-gray-100">${p.nombre || '—'} <span class="text-sm text-gray-500 dark:text-gray-400">(${p.id})</span></h3>
+            <button id="btn-back" class="bg-gray-200 dark:bg-gray-700 dark:text-gray-100 px-3 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">Volver</button>
+          </div>
+          <div class="mb-2 dark:text-gray-100">Precio: <strong>${p.precio !== undefined ? '$' + p.precio : '—'}</strong></div>
+          <div class="mb-2 dark:text-gray-100">Stock: <strong>${p.stock !== undefined ? p.stock : '—'}</strong></div>
+          <div class="mb-2 dark:text-gray-100">Categoría: <strong>${p.categoria || '—'}</strong></div>
+          <div class="mb-2 dark:text-gray-100">Descripción: ${p.descripcion || '—'}</div>
+          <pre class="bg-gray-50 dark:bg-gray-700 dark:text-gray-100 p-2 rounded text-sm">${pretty(p)}</pre>
+        `;
+        listEl.appendChild(panel);
+        panel.querySelector('#btn-back').addEventListener('click', restoreSnapshot);
+      } catch (err) { showError(err); }
+    }
+
+    async function deleteProduct(id) {
+      if (!confirm('¿Confirma eliminación del producto?')) return;
+      try {
+        const res = await api.deleteProduct(id);
+        showMessage(res && res.message ? res.message : 'Producto eliminado', 'success');
+        const el = document.getElementById('card-' + id);
+        if (el) el.remove();
+      } catch (err) { showError(err); }
+    }
+
+    async function showJSON(id) {
+      try {
+        const p = await api.getProductById(id);
+        jsonEl.textContent = pretty(p);
+        jsonEl.hidden = false;
+      } catch (err) { showError(err); }
+    }
+
+    // Delegación de eventos en la lista de resultados
+    listEl.addEventListener('click', (e) => {
+      const id = e.target.dataset.id;
+      if (!id) return;
+      if (e.target.classList.contains('btn-view')) return viewProduct(id);
+      if (e.target.classList.contains('btn-delete')) return deleteProduct(id);
+      if (e.target.classList.contains('btn-json')) return showJSON(id);
+      if (e.target.classList.contains('btn-edit')) {
+        (async () => {
+          try {
+            const p = await api.getProductById(id);
+            document.getElementById('put-id').value = id;
+            document.getElementById('put-nombre').value = p.nombre || '';
+            document.getElementById('put-descripcion').value = p.descripcion || '';
+            document.getElementById('put-precio').value = p.precio !== undefined ? p.precio : '';
+            document.getElementById('put-categoria').value = p.categoria || '';
+            document.getElementById('put-stock').value = p.stock !== undefined ? p.stock : '';
+            document.getElementById('put-id').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showMessage('Formulario de edición completado. Modifica y presiona PUT para guardar cambios.', 'info');
+          } catch (err) { showError(err); }
+        })();
+      }
+    });
+
+    // Create product
+    document.getElementById('form-create').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const payload = Object.fromEntries(fd.entries());
+      // convertir números
+      if (payload.precio) payload.precio = Number(payload.precio);
+      if (payload.stock) payload.stock = Number(payload.stock);
+      try {
+        const res = await api.createProduct(payload);
+        showMessage('Producto creado con éxito', 'success');
+        jsonEl.textContent = pretty(res);
+        jsonEl.hidden = false;
+      } catch (err) { showError(err); }
+    });
+
+    // Get all products
+    document.getElementById('btn-get-all').addEventListener('click', async () => {
+      try {
+        const res = await api.getAllProducts();
+        renderProductList(res);
+      } catch (err) { showError(err); }
+    });
+
+    // Get by id (input)
+    document.getElementById('btn-get-id').addEventListener('click', async () => {
+      const id = document.getElementById('input-get-id').value.trim();
+      if (!id) return showMessage('Ingrese ID', 'error');
+      try {
+        await viewProduct(id);
+      } catch (err) { showError(err); }
+    });
+
+    // Delete (input)
+    document.getElementById('btn-delete').addEventListener('click', async () => {
+      const id = document.getElementById('input-delete-id').value.trim();
+      if (!id) return showMessage('Ingrese ID para eliminar', 'error');
+      await deleteProduct(id);
+    });
+
+    // PUT
+    document.getElementById('btn-put').addEventListener('click', async () => {
+      const id = document.getElementById('put-id').value.trim();
+      if (!id) return showMessage('Ingrese ID', 'error');
+      const payload = {};
+      ['put-nombre','put-descripcion','put-precio','put-categoria','put-stock'].forEach(i => {
+        const v = document.getElementById(i).value.trim();
+        if (v) payload[i.replace('put-','')] = (i.endsWith('precio') || i.endsWith('stock')) ? Number(v) : v;
+      });
+      try {
+        const res = await api.putProduct(id, payload);
+        showMessage('Producto actualizado', 'success');
+        const card = document.getElementById('card-' + id);
+        if (card) {
+          const newCard = document.createElement('div');
+          newCard.innerHTML = renderProductCard(res);
+          card.replaceWith(newCard.firstElementChild);
+        } else {
+          jsonEl.textContent = pretty(res);
+          jsonEl.hidden = false;
+        }
+      } catch (err) { showError(err); }
+    });
+
+    // PATCH
+    document.getElementById('btn-patch').addEventListener('click', async () => {
+      const id = document.getElementById('patch-id').value.trim();
+      const field = document.getElementById('patch-field').value.trim();
+      const value = document.getElementById('patch-value').value.trim();
+      if (!id || !field) return showMessage('Ingrese ID y campo', 'error');
+      const val = ['precio','stock'].includes(field) ? Number(value) : value;
+      try {
+        const res = await api.patchProduct(id, { [field]: val });
+        showMessage('Producto actualizado (patch)', 'success');
+        const card = document.getElementById('card-' + id);
+        if (card) {
+          const newCard = document.createElement('div');
+          newCard.innerHTML = renderProductCard(res);
+          card.replaceWith(newCard.firstElementChild);
+        } else {
+          jsonEl.textContent = pretty(res);
+          jsonEl.hidden = false;
+        }
+      } catch (err) { showError(err); }
+    });
+
+  </script>
+</body>
+</html>

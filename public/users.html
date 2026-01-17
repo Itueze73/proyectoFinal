@@ -1,0 +1,383 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Usuarios - Cliente API</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class'
+    }
+  </script>
+  <script>
+    // Restaurar preferencia de tema al cargar
+    if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+</head>
+<body class="bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-100">
+  <div class="max-w-5xl mx-auto p-6">
+    <header class="flex items-center justify-between mb-6">
+      <h1 class="text-2xl font-bold">Usuarios - Cliente</h1>
+      <div class="flex items-center gap-2">
+        <a href="/products.html" class="mr-4 bg-purple-500 text-white px-3 py-1 rounded hover:bg-purple-600 dark:hover:bg-purple-700">Productos</a>
+        <button id="btn-show-token" class="mr-2 bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 dark:hover:bg-blue-700">Mostrar token</button>
+        <button id="btn-dark-mode" class="bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-3 py-1 rounded hover:bg-gray-400 dark:hover:bg-gray-600">🌙 Oscuro</button>
+      </div>
+    </header>
+
+    <div id="msg" class="mb-6 w-full"></div>
+
+    <main class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section class="bg-white dark:bg-gray-800 p-4 rounded shadow dark:shadow-gray-800">
+        <h2 class="font-semibold mb-2 dark:text-gray-100">Registro</h2>
+        <form id="form-create">
+          <input class="w-full mb-2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" name="nombre" placeholder="Nombre" required />
+          <input class="w-full mb-2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" name="email" placeholder="Email" type="email" required />
+          <input class="w-full mb-2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" name="password" placeholder="Contraseña" type="password" required />
+          <input class="w-full mb-2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" name="rol" placeholder="Rol (opcional)" />
+          <input class="w-full mb-2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" name="ubicacion" placeholder="Ubicación (opcional)" />
+          <input class="w-full mb-2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" name="experiencia" placeholder="Experiencia (opcional)" />
+          <button class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 dark:hover:bg-green-700">Crear usuario</button>
+        </form>
+      </section>
+
+      <div class="flex flex-col gap-6">
+        <section class="bg-white dark:bg-gray-800 p-4 rounded shadow dark:shadow-gray-800">
+          <h2 class="font-semibold mb-2 dark:text-gray-100">Login</h2>
+          <form id="form-login">
+            <input class="w-full mb-2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" name="email" placeholder="Email" type="email" required />
+            <input class="w-full mb-2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" name="password" placeholder="Contraseña" type="password" required />
+            <div class="flex gap-2">
+              <button class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 dark:hover:bg-blue-700">Login</button>
+              <button id="btn-clear-token" class="bg-gray-300 dark:bg-gray-600 text-black dark:text-white px-3 py-1 rounded hover:bg-gray-400 dark:hover:bg-gray-500">Cerrar sesión</button>
+            </div>
+          </form>
+        </section>
+
+        <section class="bg-white dark:bg-gray-800 p-4 rounded shadow dark:shadow-gray-800">
+          <h2 class="font-semibold mb-2 dark:text-gray-100">Operaciones protegidas</h2>
+          <div class="flex gap-2 mb-2">
+            <button id="btn-get-all" class="bg-indigo-500 text-white px-3 py-1 rounded hover:bg-indigo-600 dark:hover:bg-indigo-700">Obtener todos</button>
+            <input id="input-get-id" class="w-1/2 p-2 border rounded dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="ID usuario" />
+            <button id="btn-get-id" class="bg-indigo-400 text-white px-3 py-1 rounded hover:bg-indigo-500 dark:hover:bg-indigo-600">Obtener por ID</button>
+          </div>
+          <div class="mb-2">
+            <input id="input-delete-id" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="ID para eliminar" />
+            <button id="btn-delete" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 dark:hover:bg-red-700">Eliminar</button>
+          </div>
+          <details class="mb-2 dark:text-gray-100">
+            <summary class="cursor-pointer font-medium dark:hover:text-gray-200">Actualizar (PUT)</summary>
+            <div class="mt-2">
+              <input id="put-id" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="ID a actualizar" />
+              <input id="put-nombre" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="Nombre" />
+              <input id="put-email" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="Email" />
+              <input id="put-password" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="Contraseña" />
+              <button id="btn-put" class="bg-yellow-500 text-white px-3 py-1 rounded hover:bg-yellow-600 dark:hover:bg-yellow-700">PUT</button>
+            </div>
+          </details>
+          <details class="dark:text-gray-100">
+            <summary class="cursor-pointer font-medium dark:hover:text-gray-200">Actualizar (PATCH)</summary>
+            <div class="mt-2">
+              <input id="patch-id" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="ID a patch" />
+              <input id="patch-field" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="Campo (nombre / email / rol / ubicacion / experiencia / password)" />
+              <input id="patch-value" class="w-full p-2 border rounded mb-2 dark:bg-gray-700 dark:border-gray-600 dark:text-gray-100 dark:placeholder-gray-400" placeholder="Valor" />
+              <button id="btn-patch" class="bg-yellow-400 text-white px-3 py-1 rounded hover:bg-yellow-500 dark:hover:bg-yellow-600">PATCH</button>
+            </div>
+          </details>
+        </section>
+      </div>
+
+
+      <section class="bg-white dark:bg-gray-800 p-4 rounded shadow dark:shadow-gray-800 md:col-span-2">
+        <h2 class="font-semibold mb-2 dark:text-gray-100">Resultado</h2>
+
+        <div id="result-list" class="space-y-3"></div>
+        <pre id="result-json" class="whitespace-pre-wrap bg-gray-50 dark:bg-gray-700 dark:text-gray-100 p-4 rounded h-40 overflow-auto text-sm mt-3 hidden"></pre>
+      </section>
+    </main>
+  </div>
+
+  <script type="module">
+    import { api, pretty, setToken, getToken, removeToken } from './api-client.js';
+
+    // Dark mode toggle
+    const darkModeBtn = document.getElementById('btn-dark-mode');
+    darkModeBtn.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark');
+      if (document.documentElement.classList.contains('dark')) {
+        localStorage.theme = 'dark';
+        darkModeBtn.textContent = '☀️ Claro';
+      } else {
+        localStorage.theme = 'light';
+        darkModeBtn.textContent = '🌙 Oscuro';
+      }
+    });
+    // Actualizar el texto del botón según el estado actual
+    if (document.documentElement.classList.contains('dark')) {
+      darkModeBtn.textContent = '☀️ Claro';
+    }
+
+    const msgEl = document.getElementById('msg');
+    const listEl = document.getElementById('result-list');
+    const jsonEl = document.getElementById('result-json');
+
+    // Snapshot para permitir volver a la vista anterior
+    let snapshot = null;
+    function saveSnapshot() {
+      snapshot = {
+        msg: msgEl.innerHTML,
+        list: listEl.innerHTML,
+        jsonText: jsonEl.textContent,
+        jsonHidden: jsonEl.hidden
+      };
+    }
+    function restoreSnapshot() {
+      if (!snapshot) {
+        clearResults();
+        showMessage('No hay vista previa para volver', 'info');
+        return;
+      }
+      msgEl.innerHTML = snapshot.msg;
+      listEl.innerHTML = snapshot.list;
+      jsonEl.textContent = snapshot.jsonText;
+      jsonEl.hidden = snapshot.jsonHidden;
+      snapshot = null;
+    }
+
+    function clearResults() {
+      msgEl.innerHTML = '';
+      listEl.innerHTML = '';
+      jsonEl.hidden = true;
+      jsonEl.textContent = '';
+    }
+
+    function showMessage(text, variant = 'info') {
+      const colors = {
+        info: 'bg-blue-50 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
+        success: 'bg-green-50 text-green-800 dark:bg-green-900 dark:text-green-200',
+        error: 'bg-red-50 text-red-800 dark:bg-red-900 dark:text-red-200'
+      };
+      msgEl.innerHTML = `<div class="p-2 rounded ${colors[variant]}">${text}</div>`;
+    }
+
+    function showError(err) {
+      const message = (err && (err.message || err.error)) || 'Error';
+      showMessage(message, 'error');
+      if (err && err.response) {
+        jsonEl.textContent = pretty(err.response);
+        jsonEl.hidden = false;
+      }
+    }
+
+    function renderUserCard(u) {
+      const id = u.id;
+      return `
+        <div id="card-${id}" class="p-4 border rounded flex justify-between items-center bg-white dark:bg-gray-800 dark:border-gray-700 dark:text-gray-100">
+          <div>
+            <div class="font-semibold text-lg">${u.nombre || '—'}</div>
+            <div class="text-sm text-gray-600 dark:text-gray-400">${u.email || '—'}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Rol: ${u.rol || '—'} • Ubicación: ${u.ubicacion || '—'}</div>
+            <div class="text-sm text-gray-500 dark:text-gray-400">Experiencia: ${u.experiencia || '—'}</div>
+          </div>
+          <div class="flex gap-2">
+            <button data-id="${id}" class="btn-view bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 dark:hover:bg-blue-700">Ver</button>
+            <button data-id="${id}" class="btn-delete bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 dark:hover:bg-red-700">Eliminar</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderUserList(users) {
+      clearResults();
+      if (!Array.isArray(users) || users.length === 0) return showMessage('No se encontraron usuarios', 'info');
+      const wrapper = document.createElement('div');
+      wrapper.className = 'grid gap-3';
+      wrapper.innerHTML = users.map(u => renderUserCard(u)).join('');
+      listEl.appendChild(wrapper);
+    }
+
+    async function viewUser(id) {
+      try {
+        const u = await api.getUserById(id);
+        // antes de mostrar detalle, guardar la vista actual
+        saveSnapshot();
+        clearResults();
+        const panel = document.createElement('div');
+        panel.className = 'bg-white dark:bg-gray-800 p-4 rounded shadow dark:shadow-gray-800';
+        panel.innerHTML = `
+          <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold dark:text-gray-100">${u.nombre || '—'} <span class="text-sm text-gray-500 dark:text-gray-400">(${u.id})</span></h3>
+            <button id="btn-back" class="bg-gray-200 dark:bg-gray-700 dark:text-gray-100 px-3 py-1 rounded hover:bg-gray-300 dark:hover:bg-gray-600">Volver</button>
+          </div>
+          <div class="mb-2 dark:text-gray-100">Email: <strong>${u.email || '—'}</strong></div>
+          <div class="mb-2 dark:text-gray-100">Rol: <strong>${u.rol || '—'}</strong></div>
+          <div class="mb-2 dark:text-gray-100">Ubicación: <strong>${u.ubicacion || '—'}</strong></div>
+          <div class="mb-2 dark:text-gray-100">Experiencia: <strong>${u.experiencia || '—'}</strong></div>
+          <pre class="bg-gray-50 dark:bg-gray-700 dark:text-gray-100 p-2 rounded text-sm">${pretty(u)}</pre>
+        `;
+        listEl.appendChild(panel);
+        panel.querySelector('#btn-back').addEventListener('click', restoreSnapshot);
+      } catch (err) { showError(err); }
+    }
+
+    async function deleteUser(id) {
+      if (!confirm('¿Confirma eliminación del usuario?')) return;
+      try {
+        const res = await api.deleteUser(id);
+        showMessage(res && res.message ? res.message : 'Usuario eliminado', 'success');
+        const el = document.getElementById('card-' + id);
+        if (el) el.remove();
+      } catch (err) { showError(err); }
+    }
+
+    async function showJSON(id) {
+      try {
+        const u = await api.getUserById(id);
+        jsonEl.textContent = pretty(u);
+        jsonEl.hidden = false;
+      } catch (err) { showError(err); }
+    }
+
+    // Delegación de eventos en la lista de resultados
+    listEl.addEventListener('click', (e) => {
+      const id = e.target.dataset.id;
+      if (!id) return;
+      if (e.target.classList.contains('btn-view')) return viewUser(id);
+      if (e.target.classList.contains('btn-delete')) return deleteUser(id);
+      if (e.target.classList.contains('btn-json')) return showJSON(id);
+      if (e.target.classList.contains('btn-edit')) {
+        // Traer datos y pre-completar el form PUT
+        (async () => {
+          try {
+            const u = await api.getUserById(id);
+            document.getElementById('put-id').value = id;
+            document.getElementById('put-nombre').value = u.nombre || '';
+            document.getElementById('put-email').value = u.email || '';
+            // Scroll hacia el formulario
+            document.getElementById('put-id').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showMessage('Formulario de edición completado. Modifica y presiona PUT para guardar cambios.', 'info');
+          } catch (err) { showError(err); }
+        })();
+      }
+    });
+
+    // Token controls
+    document.getElementById('btn-show-token').addEventListener('click', () => {
+      const t = getToken();
+      if (!t) return showMessage('No hay token almacenado', 'info');
+      msgEl.innerHTML = '';
+      listEl.innerHTML = '';
+      jsonEl.textContent = t;
+      jsonEl.classList.remove('hidden');
+      showMessage('Token mostrado abajo', 'info');
+    });
+
+    document.getElementById('btn-clear-token').addEventListener('click', () => {
+      removeToken();
+      clearResults();
+      showMessage('Sesión cerrada y token eliminado', 'success');
+    });
+
+    // Create user
+    document.getElementById('form-create').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const payload = Object.fromEntries(fd.entries());
+      try {
+        const res = await api.createUser(payload);
+        showMessage('Usuario creado con éxito', 'success');
+        jsonEl.textContent = pretty(res);
+        jsonEl.hidden = false;
+      } catch (err) { showError(err); }
+    });
+
+    // Login
+    document.getElementById('form-login').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const fd = new FormData(e.target);
+      const payload = Object.fromEntries(fd.entries());
+      try {
+        const res = await api.login(payload);
+        setToken(res.token);
+        showMessage('Login correcto', 'success');
+      } catch (err) { showError(err); }
+    });
+
+    // Get all users
+    document.getElementById('btn-get-all').addEventListener('click', async () => {
+      try {
+        const res = await api.getAllUsers();
+        renderUserList(res);
+      } catch (err) { showError(err); }
+    });
+
+    // Get by id (input)
+    document.getElementById('btn-get-id').addEventListener('click', async () => {
+      const id = document.getElementById('input-get-id').value.trim();
+      if (!id) return showMessage('Ingrese ID', 'error');
+      try {
+        await viewUser(id);
+      } catch (err) { showError(err); }
+    });
+
+    // Delete (input)
+    document.getElementById('btn-delete').addEventListener('click', async () => {
+      const id = document.getElementById('input-delete-id').value.trim();
+      if (!id) return showMessage('Ingrese ID para eliminar', 'error');
+      await deleteUser(id);
+    });
+
+    // PUT
+    document.getElementById('btn-put').addEventListener('click', async () => {
+      const id = document.getElementById('put-id').value.trim();
+      if (!id) return showMessage('Ingrese ID', 'error');
+      const payload = {};
+      ['put-nombre', 'put-email', 'put-password'].forEach(i => {
+        const v = document.getElementById(i).value.trim();
+        if (v) payload[i.replace('put-', '')] = v;
+      });
+      try {
+        const res = await api.putUser(id, payload);
+        showMessage('Usuario actualizado', 'success');
+        // Si la lista visible contiene al usuario, actualizar su tarjeta
+        const card = document.getElementById('card-' + id);
+        if (card) {
+          const newCard = document.createElement('div');
+          newCard.innerHTML = renderUserCard(res);
+          card.replaceWith(newCard.firstElementChild);
+        } else {
+          jsonEl.textContent = pretty(res);
+          jsonEl.hidden = false;
+        }
+      } catch (err) { showError(err); }
+    });
+
+    // PATCH
+    document.getElementById('btn-patch').addEventListener('click', async () => {
+      const id = document.getElementById('patch-id').value.trim();
+      const field = document.getElementById('patch-field').value.trim();
+      const value = document.getElementById('patch-value').value.trim();
+      if (!id || !field) return showMessage('Ingrese ID y campo', 'error');
+      try {
+        const res = await api.patchUser(id, { [field]: value });
+        showMessage('Usuario actualizado (patch)', 'success');
+        const card = document.getElementById('card-' + id);
+        if (card) {
+          const newCard = document.createElement('div');
+          newCard.innerHTML = renderUserCard(res);
+          card.replaceWith(newCard.firstElementChild);
+        } else {
+          jsonEl.textContent = pretty(res);
+          jsonEl.hidden = false;
+        }
+      } catch (err) { showError(err); }
+    });
+
+  </script>
+</body>
+</html>
